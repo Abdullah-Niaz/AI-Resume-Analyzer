@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block title %}Resume Analysis{% endblock %}
+{% block content %}
+<div class="app-shell">
+    <aside class="sidebar">
+        <div class="brand">
+            <span class="brand-mark"></span>
+            <span>AI Resume<br>Analyzer</span>
+        </div>
+        <nav class="nav-menu">
+            <a href="{% url 'dashboard' %}" class="nav-link"><i class="bi bi-file-earmark"></i> Dashboard</a>
+            <a href="{% url 'dashboard' %}#upload" class="nav-link"><i class="bi bi-upload"></i> Upload</a>
+            <a href="#analysis" class="nav-link active"><i class="bi bi-bar-chart"></i> Analysis</a>
+            <a href="#comparison" class="nav-link"><i class="bi bi-columns-gap"></i> Compare</a>
+            <a href="{% url 'logout' %}" class="nav-link"><i class="bi bi-box-arrow-right"></i> Logout</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header class="topbar">
+            <h1>Resume Analysis</h1>
+            <a href="{% url 'dashboard' %}" style="text-decoration:none;color:#39415f;font-weight:700;">Back</a>
+        </header>
+
+        <section class="detail-grid" id="analysis">
+            <div class="card-soft score-card" style="flex-direction:column;align-items:center;">
+                <div class="score-ring" style="--score: {% if resume.analysis %}{{ resume.analysis.final_score }}%{% else %}5%{% endif %}; width:190px;height:190px;">
+                    <div class="score-number">
+                        <strong class="counter" data-target="{% if resume.analysis %}{{ resume.analysis.final_score }}{% else %}0{% endif %}" style="font-size:58px;">0</strong>
+                        <span>/100</span>
+                    </div>
+                </div>
+                <div class="progress-track">
+                    <div id="progressBar" class="progress-fill" style="width:{% if resume.processing %}{{ resume.processing.progress }}{% else %}5{% endif %}%"></div>
+                </div>
+                <p id="stage" style="margin:12px 0 0;color:#3b435d;font-weight:700;">{% if resume.processing %}{{ resume.processing.stage }}{% else %}Queued{% endif %}</p>
+                {% if resume.generated_pdf %}
+                    <a class="btn-primary" style="display:grid;place-items:center;text-decoration:none;margin-top:16px;" href="{% url 'download_resume' resume.id %}">Download PDF</a>
+                {% endif %}
+            </div>
+
+            <div class="card-soft suggestions-card">
+                <h3>AI Suggestions</h3>
+                {% if resume.analysis %}
+                    <p style="color:#3b435d;line-height:1.7;">{{ resume.analysis.ai_output.summary_feedback }}</p>
+                    <div class="keyword-list" style="margin-top:16px;">
+                        {% for keyword in resume.analysis.ai_output.missing_keywords %}
+                            <span class="keyword-pill danger">{{ keyword }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p style="color:#3b435d;line-height:1.7;">Analyzing Resume...</p>
+                {% endif %}
+            </div>
+        </section>
+
+        <section class="comparison-grid" id="comparison">
+            <div class="card-soft">
+                <h3>Before</h3>
+                <div class="resume-text">{{ resume.extracted_text|default:'Text extraction pending...' }}</div>
+            </div>
+            <div class="card-soft">
+                <h3>After</h3>
+                <div class="resume-text">{% if resume.improvement %}{{ resume.improvement.improved_text }}{% else %}Improved content pending...{% endif %}</div>
+            </div>
+        </section>
+    </main>
+</div>
+<script>window.resumeStatusUrl = '/api/resume/{{ resume.id }}/status/';</script>
+{% endblock %}

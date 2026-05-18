@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Login · AI Resume Analyzer{% endblock %}
+{% block content %}
+<section class="auth-shell">
+    <div class="auth-card">
+        <div class="brand" style="margin-left:0;margin-bottom:24px;"><span class="brand-mark"></span><span>AI Resume<br>Analyzer</span></div>
+        <h1>Welcome back</h1>
+        <p>Login to analyze and improve your resume.</p>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button class="btn-primary" type="submit">Login</button>
+        </form>
+        <p>New here? <a href="{% url 'register' %}">Create an account</a></p>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% block title %}AI Resume Analyzer{% endblock %}
+{% block content %}
+<div class="app-shell">
+    <aside class="sidebar">
+        <div class="brand">
+            <span class="brand-mark"></span>
+            <span>AI Resume<br>Analyzer</span>
+        </div>
+
+        <nav class="nav-menu">
+            <a href="{% url 'dashboard' %}" class="nav-link active"><i class="bi bi-file-earmark"></i> Dashboard</a>
+            <a href="#upload" class="nav-link"><i class="bi bi-upload"></i> Upload</a>
+            <a href="#analysis" class="nav-link"><i class="bi bi-bar-chart"></i> Analysis</a>
+            <a href="#job-match" class="nav-link"><i class="bi bi-bag-check"></i> Job Match</a>
+            <a href="#history" class="nav-link"><i class="bi bi-clock"></i> History</a>
+        </nav>
+
+        <div class="nav-footer">
+            <a href="{% url 'logout' %}" class="logout-link"><i class="bi bi-box-arrow-right"></i> Logout</a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="topbar">
+            <h1>AI Resume Analyzer</h1>
+            <i class="bi bi-search search-icon"></i>
+        </header>
+
+        <section class="dashboard-grid">
+            <div class="card-soft score-card">
+                <div class="score-ring" style="--score: {% if latest_score %}{{ latest_score }}%{% else %}82%{% endif %};">
+                    <div class="score-number">
+                        <strong class="counter" data-target="{% if latest_score %}{{ latest_score }}{% else %}82{% endif %}">0</strong>
+                        <span>/100</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stack" id="analysis">
+                <div class="card-soft keyword-card">
+                    <h3>Matched Keywords</h3>
+                    <div class="keyword-list">
+                        {% for keyword in matched_keywords %}
+                            <span class="keyword-pill success">{{ keyword }}</span>
+                        {% empty %}
+                            <span class="keyword-pill success">Python</span>
+                            <span class="keyword-pill success">Django</span>
+                            <span class="keyword-pill success">DRF</span>
+                            <span class="keyword-pill success">PostgreSQL</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="card-soft keyword-card">
+                    <h3>Missing Keywords</h3>
+                    <div class="keyword-list">
+                        {% for keyword in missing_keywords %}
+                            <span class="keyword-pill danger">{{ keyword }}</span>
+                        {% empty %}
+                            <span class="keyword-pill danger">Kubernetes</span>
+                            <span class="keyword-pill danger">GraphQL</span>
+                            <span class="keyword-pill danger">AWS</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-soft suggestions-card">
+                <h3>AI Suggestions</h3>
+                <ul>
+                    {% for suggestion in suggestions %}
+                        <li>{{ suggestion }}</li>
+                    {% empty %}
+                        <li>Tailor your resume to the job description</li>
+                        <li>Include relevant keywords and skills</li>
+                        <li>Use a clear and concise format</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <form method="post" enctype="multipart/form-data" class="upload-form" id="upload">
+                {% csrf_token %}
+                <label class="upload-box">
+                    <input type="file" name="original_file" accept=".pdf,.docx" hidden required data-file-input>
+                    <div>
+                        <i class="bi bi-file-earmark-arrow-up"></i>
+                        <h3>Drag and drop your resume here</h3>
+                        <p>or click to upload</p>
+                        <div class="file-name" data-file-name>No file selected</div>
+                    </div>
+                </label>
+
+                <div class="form-group" id="job-match">
+                    <select name="job_role" class="form-select" required>
+                        <option value="">Select job role</option>
+                        {% for role in job_roles %}
+                            <option value="{{ role.id }}">{{ role.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                {% if form.errors %}
+                    <div class="form-group" style="color:#b41616;font-size:14px;line-height:1.5;">
+                        {{ form.errors }}
+                    </div>
+                {% endif %}
+
+                <div class="form-group">
+                    <button class="btn-primary" type="submit">Analyze Resume</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="history-list" id="history">
+            {% for r in resumes %}
+                <a class="history-item" href="{% url 'resume_detail' r.id %}">
+                    <div>
+                        <strong>{{ r.original_file.name|truncatechars:54 }}</strong><br>
+                        <small>{{ r.job_role.name }} · {{ r.created_at|date:"M d, Y H:i" }}</small>
+                    </div>
+                    <span class="badge">{{ r.status }}</span>
+                </a>
+            {% endfor %}
+        </section>
+    </main>
+</div>
+{% endblock %}
