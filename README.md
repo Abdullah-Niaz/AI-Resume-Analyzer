@@ -437,9 +437,9 @@ This keeps business logic separated from views.
 
 ## Dashboard
 
-```markdown
+
 ![Dashboard](screenshots/AI-Resume-Analyzer.png)
-```
+
 
 ---
 
